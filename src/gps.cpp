@@ -62,31 +62,32 @@ String GPS::format_time() {
 
 GPS gps;
 
-void setup_gps() { gps_usart.begin(GPS_BAUD_RATE); }
+void setup_gps() {
+    gps_usart.begin(GPS_BAUD_RATE);
+    Serial.println("GPS initialized");
+}
 
-void start_gps_receiver() {
-    while (gps_usart.available()) {
-        if (tiny_gps.encode(gps_usart.read())) {
-            gps.update_last_read();
+void update_gps_object() {
+    if (gps_usart.available() && tiny_gps.encode(gps_usart.read())) {
+        gps.update_last_read();
 
-            if (tiny_gps.satellites.isValid()) {
-                gps.set_satellites(tiny_gps.satellites);
-            }
+        if (tiny_gps.satellites.isValid()) {
+            gps.set_satellites(tiny_gps.satellites);
+        }
 
-            if (tiny_gps.location.isValid()) {
-                gps.set_location(tiny_gps.location);
-            }
+        if (tiny_gps.location.isValid()) {
+            gps.set_location(tiny_gps.location);
+        }
 
-            if (tiny_gps.date.isValid()) {
-                gps.set_date(tiny_gps.date);
-            }
-            if (tiny_gps.time.isValid()) {
-                gps.set_time(tiny_gps.time);
-            }
+        if (tiny_gps.date.isValid()) {
+            gps.set_date(tiny_gps.date);
+        }
+        if (tiny_gps.time.isValid()) {
+            gps.set_time(tiny_gps.time);
+        }
 
-            if (tiny_gps.altitude.isValid()) {
-                gps.set_altitude(tiny_gps.altitude);
-            }
+        if (tiny_gps.altitude.isValid()) {
+            gps.set_altitude(tiny_gps.altitude);
         }
     }
 }

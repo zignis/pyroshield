@@ -108,9 +108,9 @@ public:
 void setup_gps();
 
 /**
- * @brief Starts reading GPS data from the receiver.
+ * @brief Updates the GPS object by reading GPS data from the receiver.
  */
-void start_gps_receiver();
+void update_gps_object();
 
 /**
  * @return The latest GPS object.

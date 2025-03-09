@@ -13,6 +13,8 @@ void setup_bmp280() {
 
     bmp.setSampling(Adafruit_BMP280::MODE_NORMAL, Adafruit_BMP280::SAMPLING_X2, Adafruit_BMP280::SAMPLING_X16,
                     Adafruit_BMP280::FILTER_X16, Adafruit_BMP280::STANDBY_MS_500);
+
+    Serial.print("BMP280 initialized");
 }
 
 float read_bmp280_temperature() { return bmp.readTemperature(); }
