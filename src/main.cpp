@@ -5,13 +5,14 @@
 #include <lora_local.h>
 #include <mtp40f_local.h>
 
+#define LORA_SYNC_WORD 0xB4
 #define LORA_SS_PIN 10
 #define LORA_RESET_PIN 9
 #define LORA_DIO0_PIN 2
 #define DHT22_PIN 3
 
+byte device_id = 0x01; // Unique device identifier
 int8_t BMP280_CS = 10; // Chip select for BMP280 sensor.
-
 GPS gps_obj = get_gps_object();
 
 uint32_t last_packet_sent = 0; // Timestamp of the last packet that was transmitted.
@@ -23,7 +24,7 @@ void setup() {
     while (!Serial) {
     }
 
-    setup_lora(LORA_SS_PIN, LORA_RESET_PIN, LORA_DIO0_PIN);
+    setup_lora(LORA_SYNC_WORD, LORA_SS_PIN, LORA_RESET_PIN, LORA_DIO0_PIN);
     setup_bmp280();
     setup_dht22(DHT22_PIN);
     setup_mtp40f();
@@ -45,4 +46,6 @@ void loop() {
         float humidity = read_dht22_humidity();
         float dht22_temp = read_dht22_temperature();
     }
+
+    handle_lora_reception();
 }
