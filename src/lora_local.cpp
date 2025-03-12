@@ -1,4 +1,5 @@
 #include <LoRa.h>
+#include <Scheduler.h>
 
 /**
  * Packet structure
@@ -109,4 +110,6 @@ void handle_lora_reception() {
 
     Serial.println(preamble + ": successfully forwarded");
     Serial.println();
+
+    SchedulerClass::yield();
 }

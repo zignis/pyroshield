@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Scheduler.h>
 #include <bmp280.h>
 #include <dht22.h>
 #include <gps.h>
@@ -29,11 +30,12 @@ void setup() {
     setup_dht22(DHT22_PIN);
     setup_mtp40f();
     setup_gps();
+
+    SchedulerClass::startLoop(update_gps_object);
+    SchedulerClass::startLoop(handle_lora_reception);
 }
 
 void loop() {
-    update_gps_object();
-
     if (millis() - last_packet_sent > transmission_interval) {
         last_packet_sent = millis();
 
@@ -46,6 +48,4 @@ void loop() {
         float humidity = read_dht22_humidity();
         float dht22_temp = read_dht22_temperature();
     }
-
-    handle_lora_reception();
 }

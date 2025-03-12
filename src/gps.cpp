@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Scheduler.h>
 #include <TinyGPSPlus.h>
 #include <gps.h>
 
@@ -90,6 +91,8 @@ void update_gps_object() {
             gps.set_altitude(tiny_gps.altitude);
         }
     }
+
+    SchedulerClass::yield();
 }
 
 GPS get_gps_object() { return gps; }
