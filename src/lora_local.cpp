@@ -1,21 +1,12 @@
 #include <LoRa.h>
 #include <Scheduler.h>
-
-/**
- * Packet structure
- *
- * [byte] forwarder_id
- * [byte] transmitter_id
- * [byte] message_id
- * [bool] allow_forwarding
- * [byte] ttl
- */
+#include <lora_local.h>
 
 #define LORA_FREQ 433E6 // LoRa module frequency (433 MHz)
 #define PACKET_TTL 5 // Time to live for a packet
 
 extern byte device_id;
-byte msg_count = 0;
+uint16_t msg_count = 0;
 bool allow_forwarding = true;
 
 void setup_lora(const int sync_word, const int ss, const int reset, const int dio0) {
@@ -30,21 +21,18 @@ void setup_lora(const int sync_word, const int ss, const int reset, const int di
     Serial.println("LoRa initialized");
 }
 
-void send_lora_message(const String &payload) {
+void send_lora_message(LoRa_Payload payload) {
+    payload.forwarder_id = device_id;
+    payload.transmitter_id = device_id;
+    payload.message_id = msg_count++;
+    payload.allow_forwarding = allow_forwarding;
+    payload.ttl = PACKET_TTL;
+
     LoRa.beginPacket();
-
-    LoRa.write(device_id); // Current device ID
-    LoRa.write(device_id); // ID of the device that transmitted this message.
-    LoRa.write(msg_count); // Message ID
-    LoRa.write(allow_forwarding); // Forwarding flag
-    LoRa.write(PACKET_TTL); // TTL
-
-    LoRa.write(payload.length());
-    LoRa.print(payload);
-
+    LoRa.write(reinterpret_cast<byte *>(&payload), sizeof(payload));
     LoRa.endPacket();
 
-    msg_count++;
+    Serial.println("[LoRa][" + String(payload.message_id) + "]: message sent (" + String(sizeof(payload)) + " bytes)");
 }
 
 void handle_lora_reception() {
@@ -53,60 +41,37 @@ void handle_lora_reception() {
     if (packet_size == 0)
         return;
 
-    const byte forwarder_id = LoRa.read(); // Transmitter / forwarder device ID
-    const byte transmitter_id = LoRa.read(); // Original transmitter ID
-    const byte msg_id = LoRa.read();
-    const bool allow_forwarding = LoRa.read(); // Forwarding flag
-    byte ttl = LoRa.read(); // TTL value
-
-    const byte msg_size = LoRa.read();
+    LoRa_Payload payload;
+    LoRa.readBytes(reinterpret_cast<byte *>(&payload), packet_size);
 
     // Skip messages that do not allow forwarding
-    if (!allow_forwarding) {
+    if (!payload.allow_forwarding) {
         return;
     }
 
     // Do not forward packets sent by this device
-    if (forwarder_id == device_id || transmitter_id == device_id) {
+    if (payload.forwarder_id == device_id || payload.transmitter_id == device_id) {
         return;
     }
 
     // Drop stuck packet
-    if (--ttl == 0) {
+    if (--payload.ttl == 0) {
         return;
     }
 
-    String incoming = "";
-    const String preamble =
-            "[LoRa][" + String(forwarder_id, HEX) + "][" + String(transmitter_id, HEX) + ":" + String(msg_id) + "]";
+    const String preamble = "[LoRa][" + String(payload.forwarder_id, HEX) + "][" + String(payload.transmitter_id, HEX) +
+                            ":" + String(payload.message_id) + "]";
 
-    while (LoRa.available()) {
-        incoming += static_cast<char>(LoRa.read());
-    }
-
-    if (msg_size != incoming.length()) {
-        Serial.println(preamble + ": message length does not match");
-        return;
-    }
-
-    Serial.println(preamble + ": forwarding packet (" + String(msg_size) + " bytes)...");
-    Serial.println(preamble + ": outgoing TTL " + ttl);
+    Serial.println(preamble + ": forwarding packet (" + String(packet_size) + " bytes)...");
+    Serial.println(preamble + ": outgoing TTL " + payload.ttl);
     Serial.println(preamble + ": RSSI " + String(LoRa.packetRssi()));
     Serial.println(preamble + ": SNR " + String(LoRa.packetSnr()));
 
     // Forward the packet
     LoRa.beginPacket();
-
-    LoRa.write(device_id);
-    LoRa.write(transmitter_id);
-    LoRa.write(msg_id);
-    LoRa.write(allow_forwarding);
-    LoRa.write(ttl);
-
-    LoRa.write(msg_size);
-    LoRa.print(incoming);
-
-    LoRa.endPacket();
+    payload.forwarder_id = device_id;
+    LoRa.write(reinterpret_cast<byte *>(&payload), sizeof(payload));
+    LoRa.endPacket(true); // Non-blocking
 
     Serial.println(preamble + ": successfully forwarded");
     Serial.println();
