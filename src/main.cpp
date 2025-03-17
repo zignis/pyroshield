@@ -11,7 +11,7 @@
 #define LORA_RESET_PIN 9
 #define LORA_DIO0_PIN 2
 #define DHT22_PIN 3
-#define EMERGENCY_MODE_CO2_THRESHOLD 1000 // Threshold for emergency mode (in PPM).
+#define EMERGENCY_MODE_CO2_THRESHOLD 800 // Threshold for emergency mode (in PPM).
 
 byte device_id = 0x01; // Unique device identifier
 int8_t BMP280_CS = 10; // Chip select for BMP280 sensor.
