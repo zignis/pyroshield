@@ -1,10 +1,12 @@
 #include <DHT.h>
+#include <HardwareSerial.h>
 
+extern HardwareSerial GlobalSerial;
 DHT dht;
 
 void setup_dht22(const uint8_t pin) {
     dht.setup(pin, DHT::DHT22);
-    Serial.println("DHT22 initialized");
+    GlobalSerial.println("DHT22 initialized");
 }
 
 int get_dht22_min_sampling_period() { return dht.getMinimumSamplingPeriod(); }

@@ -1,11 +1,12 @@
 #include <Arduino.h>
-#include <Scheduler.h>
+#include <HardwareSerial.h>
 #include <TinyGPSPlus.h>
 #include <gps.h>
 
 #define GPS_BAUD_RATE 115200
 
-USARTClass gps_usart = Serial2;
+extern HardwareSerial GlobalSerial;
+auto GPS_Serial = HardwareSerial(USART3);
 TinyGPSPlus tiny_gps;
 
 GPS::GPS() { last_read = millis(); }
@@ -64,12 +65,12 @@ String GPS::format_time() {
 GPS gps;
 
 void setup_gps() {
-    gps_usart.begin(GPS_BAUD_RATE);
-    Serial.println("GPS initialized");
+    GPS_Serial.begin(GPS_BAUD_RATE);
+    GlobalSerial.println("GPS initialized");
 }
 
 void update_gps_object() {
-    if (gps_usart.available() && tiny_gps.encode(gps_usart.read())) {
+    if (GPS_Serial.available() && tiny_gps.encode(GPS_Serial.read())) {
         gps.update_last_read();
 
         if (tiny_gps.satellites.isValid()) {
@@ -91,8 +92,6 @@ void update_gps_object() {
             gps.set_altitude(tiny_gps.altitude);
         }
     }
-
-    SchedulerClass::yield();
 }
 
 GPS get_gps_object() { return gps; }

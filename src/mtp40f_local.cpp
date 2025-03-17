@@ -1,21 +1,25 @@
+#include <HardwareSerial.h>
 #include <MTP40F.h>
 
 #define MTP40F_READ_INTERVAL 2000 // Measurement interval
 #define MTP40F_BAUD_RATE 9600
 
-MTP40F mtp(&Serial1);
+extern HardwareSerial GlobalSerial;
+
+auto MTP40F_Serial = HardwareSerial(USART2);
+MTP40F mtp(&MTP40F_Serial);
 
 void setup_mtp40f() {
-    Serial1.begin(MTP40F_BAUD_RATE);
+    MTP40F_Serial.begin(MTP40F_BAUD_RATE);
 
     if (mtp.begin() == false) {
-        Serial.println("Failed to initialize MTP40F");
+        GlobalSerial.println("Failed to initialize MTP40F");
         exit(EXIT_FAILURE);
     }
 
-    Serial.println("MTP40F initialized");
+    GlobalSerial.println("MTP40F initialized");
 }
 
-bool has_mtp40f_updated() { return millis() - mtp.lastRead() >= MTP40F_READ_INTERVAL; }
+bool has_mtp40f_updated() { return millis() - mtp.last_read() >= MTP40F_READ_INTERVAL; }
 
-uint32_t read_mtp40f_gas_concentration() { return mtp.getGasConcentration(); }
+uint32_t read_mtp40f_gas_concentration() { return mtp.get_gas_concentration(); }

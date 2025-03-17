@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <Scheduler.h>
+#include <HardwareSerial.h>
 #include <bmp280.h>
 #include <dht22.h>
 #include <gps.h>
@@ -13,6 +13,8 @@
 #define DHT22_PIN 3
 #define EMERGENCY_MODE_CO2_THRESHOLD 800 // Threshold for emergency mode (in PPM).
 
+auto GlobalSerial = HardwareSerial(USART1);
+
 byte device_id = 0x01; // Unique device identifier
 int8_t BMP280_CS = 10; // Chip select for BMP280 sensor.
 GPS gps_obj = get_gps_object();
@@ -22,9 +24,9 @@ uint32_t transmission_interval = 60 * 1000; // Interval for transmission (in ms)
 uint32_t emergency_mode_interval = 10 * 1000; // Interval for emergency mode (in ms).
 
 void setup() {
-    Serial.begin(9600);
+    GlobalSerial.begin(9600);
 
-    while (!Serial) {
+    while (!GlobalSerial) {
     }
 
     setup_lora(LORA_SYNC_WORD, LORA_SS_PIN, LORA_RESET_PIN, LORA_DIO0_PIN);
@@ -32,12 +34,12 @@ void setup() {
     setup_dht22(DHT22_PIN);
     setup_mtp40f();
     setup_gps();
-
-    SchedulerClass::startLoop(update_gps_object);
-    SchedulerClass::startLoop(handle_lora_reception);
 }
 
 void loop() {
+    update_gps_object();
+    handle_lora_reception();
+
     const uint32_t co2_ppm = read_mtp40f_gas_concentration();
     const uint32_t interval = co2_ppm >= EMERGENCY_MODE_CO2_THRESHOLD ? emergency_mode_interval : transmission_interval;
 

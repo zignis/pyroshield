@@ -58,32 +58,32 @@ public:
     /**
      * @return The number of satellites.
      */
-    TinyGPSInteger get_satellites() const;
+    [[nodiscard]] TinyGPSInteger get_satellites() const;
 
     /**
      * @return The GPS location.
      */
-    TinyGPSLocation get_location() const;
+    [[nodiscard]] TinyGPSLocation get_location() const;
 
     /**
      * @return The GPS date.
      */
-    TinyGPSDate get_date() const;
+    [[nodiscard]] TinyGPSDate get_date() const;
 
     /**
      * @return The GPS time.
      */
-    TinyGPSTime get_time() const;
+    [[nodiscard]] TinyGPSTime get_time() const;
 
     /**
      * @return The GPS altitude.
      */
-    TinyGPSAltitude get_altitude() const;
+    [[nodiscard]] TinyGPSAltitude get_altitude() const;
 
     /**
      * @return The timestamp of the last GPS update.
      */
-    uint32_t get_last_read() const;
+    [[nodiscard]] uint32_t get_last_read() const;
 
     /**
      * @return Comma-separated latitude and longitude.

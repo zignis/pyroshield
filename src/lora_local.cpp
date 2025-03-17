@@ -1,11 +1,13 @@
+#include <HardwareSerial.h>
 #include <LoRa.h>
-#include <Scheduler.h>
 #include <lora_local.h>
 
 #define LORA_FREQ 433E6 // LoRa module frequency (433 MHz)
 #define PACKET_TTL 5 // Time to live for a packet
 
+extern HardwareSerial GlobalSerial;
 extern byte device_id;
+
 uint16_t msg_count = 0;
 bool allow_forwarding = true;
 
@@ -14,11 +16,11 @@ void setup_lora(const int sync_word, const int ss, const int reset, const int di
     LoRa.setSyncWord(sync_word);
 
     if (!LoRa.begin(LORA_FREQ)) {
-        Serial.println("Failed to initialize LoRa");
+        GlobalSerial.println("Failed to initialize LoRa");
         exit(EXIT_FAILURE);
     }
 
-    Serial.println("LoRa initialized");
+    GlobalSerial.println("LoRa initialized");
 }
 
 void send_lora_message(LoRa_Payload payload) {
@@ -32,7 +34,8 @@ void send_lora_message(LoRa_Payload payload) {
     LoRa.write(reinterpret_cast<byte *>(&payload), sizeof(payload));
     LoRa.endPacket();
 
-    Serial.println("[LoRa][" + String(payload.message_id) + "]: message sent (" + String(sizeof(payload)) + " bytes)");
+    GlobalSerial.println("[LoRa][" + String(payload.message_id) + "]: message sent (" + String(sizeof(payload)) +
+                         " bytes)");
 }
 
 void handle_lora_reception() {
@@ -62,10 +65,10 @@ void handle_lora_reception() {
     const String preamble = "[LoRa][" + String(payload.forwarder_id, HEX) + "][" + String(payload.transmitter_id, HEX) +
                             ":" + String(payload.message_id) + "]";
 
-    Serial.println(preamble + ": forwarding packet (" + String(packet_size) + " bytes)...");
-    Serial.println(preamble + ": outgoing TTL " + payload.ttl);
-    Serial.println(preamble + ": RSSI " + String(LoRa.packetRssi()));
-    Serial.println(preamble + ": SNR " + String(LoRa.packetSnr()));
+    GlobalSerial.println(preamble + ": forwarding packet (" + String(packet_size) + " bytes)...");
+    GlobalSerial.println(preamble + ": outgoing TTL " + payload.ttl);
+    GlobalSerial.println(preamble + ": RSSI " + String(LoRa.packetRssi()));
+    GlobalSerial.println(preamble + ": SNR " + String(LoRa.packetSnr()));
 
     // Forward the packet
     LoRa.beginPacket();
@@ -73,8 +76,6 @@ void handle_lora_reception() {
     LoRa.write(reinterpret_cast<byte *>(&payload), sizeof(payload));
     LoRa.endPacket(true); // Non-blocking
 
-    Serial.println(preamble + ": successfully forwarded");
-    Serial.println();
-
-    SchedulerClass::yield();
+    GlobalSerial.println(preamble + ": successfully forwarded");
+    GlobalSerial.println();
 }
