@@ -3,11 +3,10 @@
 #define MTP40F_READ_INTERVAL 2000 // Measurement interval
 #define MTP40F_BAUD_RATE 9600
 
-USARTClass mtp40f_usart = Serial1;
-MTP40F mtp(&mtp40f_usart);
+MTP40F mtp(&Serial1);
 
 void setup_mtp40f() {
-    mtp40f_usart.begin(MTP40F_BAUD_RATE);
+    Serial1.begin(MTP40F_BAUD_RATE);
 
     if (mtp.begin() == false) {
         Serial.println("Failed to initialize MTP40F");
