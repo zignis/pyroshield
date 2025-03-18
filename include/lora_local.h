@@ -21,6 +21,7 @@ typedef struct {
     uint16_t gps_satellites{}; /// The number of GPS satellites in view.
 
     /* Power */
+    uint8_t battery_temp{}; // The battery temperature reading.
     uint16_t battery_voltage{}; /// The battery voltage reading (scaled by 100).
     uint16_t charger_voltage{}; /// The charger voltage reading (scaled by 100).
 } LoRa_Payload;
