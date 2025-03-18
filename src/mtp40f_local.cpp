@@ -22,4 +22,4 @@ void setup_mtp40f() {
 
 bool has_mtp40f_updated() { return millis() - mtp.last_read() >= MTP40F_READ_INTERVAL; }
 
-uint32_t read_mtp40f_gas_concentration() { return mtp.get_gas_concentration(); }
+uint16_t read_mtp40f_gas_concentration() { return mtp.get_gas_concentration(); }

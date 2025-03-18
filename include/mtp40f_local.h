@@ -13,4 +13,4 @@ bool has_mtp40f_updated();
 /**
  * @return CO2 gas concentration in PPM.
  */
-uint32_t read_mtp40f_gas_concentration();
+uint16_t read_mtp40f_gas_concentration();

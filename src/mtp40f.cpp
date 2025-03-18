@@ -47,7 +47,7 @@ bool MTP40F::set_air_pressure_reference(const int apr) {
     return request(cmd, 11, 11);
 }
 
-uint32_t MTP40F::get_gas_concentration() {
+uint16_t MTP40F::get_gas_concentration() {
     _last_error = MTP40F_OK;
 
     // Maximum read freq. is once per 2 seconds

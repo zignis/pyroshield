@@ -42,7 +42,7 @@ public:
     /**
      * @return CO2 concentration in PPM.
      */
-    uint32_t get_gas_concentration();
+    uint16_t get_gas_concentration();
 
     /**
      * @brief Enables or disables error suppression.
@@ -112,7 +112,7 @@ protected:
     uint32_t _timeout = 100; /// Serial communication timeout (in ms).
     uint32_t _last_read = 0; /// Timestamp of the last successful read.
     int _air_pressure_reference = 0; /// Air pressure reference value (in hPa).
-    uint32_t _gas_level = 0; /// CO2 concentration value (in PPM).
+    uint16_t _gas_level = 0; /// CO2 concentration value (in PPM).
     bool _suppress_error = false; /// Flag for suppressing errors.
     int _last_error = MTP40F_OK; /// Last recorded error code.
 
