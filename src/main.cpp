@@ -61,6 +61,10 @@ void loop() {
         payload.gps_lat = static_cast<float>(loc.lat());
         payload.gps_lng = static_cast<float>(loc.lng());
 
+        // TODO: Measure voltage using ADC
+        payload.battery_voltage = static_cast<uint16_t>(4.20 * 100);
+        payload.charger_voltage = static_cast<uint16_t>(0.00 * 100);
+
         last_packet_sent = millis();
         send_lora_message(payload);
     }

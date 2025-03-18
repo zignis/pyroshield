@@ -19,6 +19,10 @@ typedef struct {
     float gps_lat{}; /// The latitude reading from GPS.
     float gps_lng{}; /// The longitude reading from GPS.
     uint16_t gps_satellites{}; /// The number of GPS satellites in view.
+
+    /* Power */
+    uint16_t battery_voltage{}; /// The battery voltage reading (scaled by 100).
+    uint16_t charger_voltage{}; /// The charger voltage reading (scaled by 100).
 } LoRa_Payload;
 
 /**
