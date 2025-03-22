@@ -11,7 +11,6 @@
 #define LORA_SS_PIN PA8
 #define LORA_RESET_PIN PB15
 #define LORA_DIO0_PIN PB14
-#define DHT22_PIN PB7
 #define EMERGENCY_MODE_CO2_THRESHOLD 800 // Threshold for emergency mode (in PPM).
 
 auto GlobalSerial = HardwareSerial(USART1);
@@ -33,7 +32,7 @@ void setup() {
     setup_power_sources();
     setup_lora(LORA_SYNC_WORD, LORA_SS_PIN, LORA_RESET_PIN, LORA_DIO0_PIN);
     setup_bmp280();
-    setup_dht22(DHT22_PIN);
+    setup_dht22();
     setup_mtp40f();
     setup_gps();
 }

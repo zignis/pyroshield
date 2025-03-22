@@ -1,18 +1,34 @@
+#include <Adafruit_Sensor.h>
 #include <DHT.h>
+#include <DHT_U.h>
 #include <HardwareSerial.h>
 
-extern HardwareSerial GlobalSerial;
-DHT dht;
+#define DHT_PIN PB7
+#define DHT_TYPE DHT22
 
-void setup_dht22(const uint8_t pin) {
-    dht.setup(pin, DHT::DHT22);
-    GlobalSerial.println("DHT22 initialized");
+extern HardwareSerial GlobalSerial;
+
+DHT_Unified dht(DHT_PIN, DHT_TYPE);
+sensors_event_t dht_event;
+
+void setup_dht22() { dht.begin(); }
+
+float read_dht22_temperature() {
+    dht.temperature().getEvent(&dht_event);
+
+    if (isnan(dht_event.temperature)) {
+        return 0;
+    }
+
+    return dht_event.temperature;
 }
 
-int get_dht22_min_sampling_period() { return dht.getMinimumSamplingPeriod(); }
+float read_dht22_humidity() {
+    dht.humidity().getEvent(&dht_event);
 
-const char *read_dht22_status() { return dht.getStatusString(); }
+    if (isnan(dht_event.relative_humidity)) {
+        return 0;
+    }
 
-float read_dht22_temperature() { return dht.getTemperature(); }
-
-float read_dht22_humidity() { return dht.getHumidity(); }
+    return dht_event.relative_humidity;
+}
