@@ -9,7 +9,7 @@
 #define B_VALUE 3950 // B-coefficient of 10k thermistor
 #define TEMP_0 298.15 // 25°C in kelvin
 
-#define V_DIVIDER_R1 30000.0 // Voltage divider resistor-1 value (in ohms, other end is connected to input voltage)
+#define V_DIVIDER_R1 33000.0 // Voltage divider resistor-1 value (in ohms, other end is connected to input voltage)
 #define V_DIVIDER_R2 15000.0 // Voltage divider resistor-2 value (in ohms, other end is connected to ground)
 
 void setup_power_sources() {
