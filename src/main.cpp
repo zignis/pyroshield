@@ -12,6 +12,7 @@
 #define LORA_RESET_PIN PB15
 #define LORA_DIO0_PIN PB14
 #define EMERGENCY_MODE_CO2_THRESHOLD 800 // Threshold for emergency mode (in PPM).
+#define DEBUG_MODE_PIN PinName::PA_15
 
 auto GlobalSerial = HardwareSerial(USART1);
 
@@ -22,12 +23,16 @@ GPS gps_obj = get_gps_object();
 uint32_t last_packet_sent = 0; // Timestamp of the last packet that was transmitted.
 uint32_t transmission_interval = 60 * 1000; // Interval for transmission (in ms).
 uint32_t emergency_mode_interval = 10 * 1000; // Interval for emergency mode (in ms).
+uint32_t debug_mode_transmission_interval = 10 * 1000; // Interval for transmission in debug mode (in ms)
+uint32_t debug_mode_emergency_interval = 5 * 1000; // Interval for transmission in emergency mode (in ms)
 
 void setup() {
     GlobalSerial.begin(9600);
 
     while (!GlobalSerial) {
     }
+
+    pinMode(DEBUG_MODE_PIN, INPUT);
 
     setup_power_sources();
     setup_lora(LORA_SYNC_WORD, LORA_SS_PIN, LORA_RESET_PIN, LORA_DIO0_PIN);
@@ -41,8 +46,12 @@ void loop() {
     update_gps_object();
 
     const uint16_t co2_ppm = read_mtp40f_gas_concentration();
+    const bool debug = digitalReadFast(DEBUG_MODE_PIN) == HIGH;
+    const uint32_t transmission_interval_val = debug ? debug_mode_transmission_interval : transmission_interval;
+    const uint32_t emergency_mode_interval_val = debug ? debug_mode_emergency_interval : emergency_mode_interval;
     // ReSharper disable once CppTooWideScopeInitStatement
-    const uint32_t interval = co2_ppm >= EMERGENCY_MODE_CO2_THRESHOLD ? emergency_mode_interval : transmission_interval;
+    const uint32_t interval =
+            co2_ppm >= EMERGENCY_MODE_CO2_THRESHOLD ? emergency_mode_interval_val : transmission_interval_val;
 
     if (millis() - last_packet_sent > interval) {
         TinyGPSLocation loc = gps_obj.get_location();
@@ -71,4 +80,5 @@ void loop() {
     }
 
     handle_lora_reception();
+    delay(100);
 }
