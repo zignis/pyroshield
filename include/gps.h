@@ -111,8 +111,3 @@ void setup_gps();
  * @brief Updates the GPS object by reading GPS data from the receiver.
  */
 void update_gps_object();
-
-/**
- * @return The latest GPS object.
- */
-GPS get_gps_object();

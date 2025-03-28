@@ -18,7 +18,7 @@ auto GlobalSerial = HardwareSerial(USART1);
 
 byte device_id = 0x01; // Unique device identifier
 int8_t BMP280_CS = 10; // Chip select for BMP280 sensor.
-GPS gps_obj = get_gps_object();
+GPS gps; // GPS object.
 
 uint32_t last_packet_sent = 0; // Timestamp of the last packet that was transmitted.
 uint32_t transmission_interval = 60 * 1000; // Interval for transmission (in ms).
@@ -27,12 +27,11 @@ uint32_t debug_mode_transmission_interval = 10 * 1000; // Interval for transmiss
 uint32_t debug_mode_emergency_interval = 5 * 1000; // Interval for transmission in emergency mode (in ms)
 
 void setup() {
-    GlobalSerial.begin(9600);
-
-    while (!GlobalSerial) {
-    }
-
     pinMode(DEBUG_MODE_PIN, INPUT);
+
+    GlobalSerial.begin(9600);
+    delay(10.000); // Wait for Serial communication
+    GlobalSerial.println("Starting...");
 
     setup_power_sources();
     setup_lora(LORA_SYNC_WORD, LORA_SS_PIN, LORA_RESET_PIN, LORA_DIO0_PIN);
@@ -54,7 +53,7 @@ void loop() {
             co2_ppm >= EMERGENCY_MODE_CO2_THRESHOLD ? emergency_mode_interval_val : transmission_interval_val;
 
     if (millis() - last_packet_sent > interval) {
-        TinyGPSLocation loc = gps_obj.get_location();
+        TinyGPSLocation loc = gps.get_location();
         LoRa_Payload payload;
 
         payload.co2_ppm = co2_ppm;
@@ -66,8 +65,8 @@ void loop() {
         payload.dht22_temp = static_cast<uint8_t>(read_dht22_temperature());
         payload.humidity = static_cast<uint8_t>(read_dht22_humidity());
 
-        payload.gps_altitude = static_cast<uint16_t>(gps_obj.get_altitude().meters());
-        payload.gps_satellites = static_cast<uint16_t>(gps_obj.get_satellites().value());
+        payload.gps_altitude = static_cast<uint16_t>(gps.get_altitude().meters());
+        payload.gps_satellites = static_cast<uint16_t>(gps.get_satellites().value());
         payload.gps_lat = static_cast<float>(loc.lat());
         payload.gps_lng = static_cast<float>(loc.lng());
 
@@ -80,5 +79,4 @@ void loop() {
     }
 
     handle_lora_reception();
-    delay(100);
 }

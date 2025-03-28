@@ -6,8 +6,11 @@
 #define GPS_BAUD_RATE 115200
 
 extern HardwareSerial GlobalSerial;
-auto GPS_Serial = HardwareSerial(USART3);
+extern GPS gps;
+
+HardwareSerial GPS_Serial(PB11, PB10);
 TinyGPSPlus tiny_gps;
+
 
 GPS::GPS() { last_read = millis(); }
 
@@ -62,36 +65,36 @@ String GPS::format_time() {
     return "Invalid";
 }
 
-GPS gps;
-
 void setup_gps() {
     GPS_Serial.begin(GPS_BAUD_RATE);
     GlobalSerial.println("GPS initialized");
 }
 
 void update_gps_object() {
-    if (GPS_Serial.available() && tiny_gps.encode(GPS_Serial.read())) {
-        gps.update_last_read();
+    auto bytes_available = GPS_Serial.available();
 
-        if (tiny_gps.satellites.isValid()) {
-            gps.set_satellites(tiny_gps.satellites);
-        }
+    while (bytes_available--) {
+        if (tiny_gps.encode(GPS_Serial.read())) {
+            gps.update_last_read();
 
-        if (tiny_gps.location.isValid()) {
-            gps.set_location(tiny_gps.location);
-        }
+            if (tiny_gps.satellites.isValid()) {
+                gps.set_satellites(tiny_gps.satellites);
+            }
 
-        if (tiny_gps.date.isValid()) {
-            gps.set_date(tiny_gps.date);
-        }
-        if (tiny_gps.time.isValid()) {
-            gps.set_time(tiny_gps.time);
-        }
+            if (tiny_gps.location.isValid()) {
+                gps.set_location(tiny_gps.location);
+            }
 
-        if (tiny_gps.altitude.isValid()) {
-            gps.set_altitude(tiny_gps.altitude);
+            if (tiny_gps.date.isValid()) {
+                gps.set_date(tiny_gps.date);
+            }
+            if (tiny_gps.time.isValid()) {
+                gps.set_time(tiny_gps.time);
+            }
+
+            if (tiny_gps.altitude.isValid()) {
+                gps.set_altitude(tiny_gps.altitude);
+            }
         }
     }
 }
-
-GPS get_gps_object() { return gps; }
