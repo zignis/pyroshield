@@ -42,8 +42,6 @@ void setup() {
 }
 
 void loop() {
-    update_gps_object();
-
     const uint16_t co2_ppm = read_mtp40f_gas_concentration();
     const bool debug = digitalReadFast(DEBUG_MODE_PIN) == HIGH;
     const uint32_t transmission_interval_val = debug ? debug_mode_transmission_interval : transmission_interval;
@@ -80,3 +78,5 @@ void loop() {
 
     handle_lora_reception();
 }
+
+void serialEvent() { update_gps_object(); }
