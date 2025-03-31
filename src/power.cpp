@@ -13,9 +13,9 @@
 #define V_DIVIDER_R2 15000.0 // Voltage divider resistor-2 value (in ohms, other end is connected to ground)
 
 void setup_power_sources() {
-    pinMode(THERMISTOR_PIN, INPUT_ANALOG);
-    pinMode(BATTERY_PIN, INPUT_ANALOG);
-    pinMode(CHARGER_PIN, INPUT_ANALOG);
+    pinMode(THERMISTOR_PIN, INPUT_PULLDOWN);
+    pinMode(BATTERY_PIN, INPUT_PULLDOWN);
+    pinMode(CHARGER_PIN, INPUT_PULLDOWN);
 }
 
 uint8_t read_battery_temperature() {
