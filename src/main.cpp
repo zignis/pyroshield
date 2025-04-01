@@ -12,7 +12,8 @@
 #define LORA_RESET_PIN PB15
 #define LORA_DIO0_PIN PB14
 #define EMERGENCY_MODE_CO2_THRESHOLD 800 // Threshold for emergency mode (in PPM).
-#define DEBUG_MODE_PIN PinName::PA_15
+#define DEBUG_MODE_PIN PinName::PB_12
+#define STATUS_LED PC13
 
 auto GlobalSerial = HardwareSerial(USART1);
 
@@ -27,7 +28,10 @@ uint32_t debug_mode_transmission_interval = 5 * 1000; // Interval for transmissi
 uint32_t debug_mode_emergency_interval = 2 * 1000; // Interval for transmission in emergency mode (in ms)
 
 void setup() {
-    pinMode(DEBUG_MODE_PIN, INPUT);
+    pinMode(DEBUG_MODE_PIN, INPUT_PULLDOWN);
+    pinMode(STATUS_LED, OUTPUT);
+
+    digitalWrite(STATUS_LED, HIGH);
 
     GlobalSerial.begin(9600);
     delay(10.000); // Wait for Serial communication
@@ -39,6 +43,8 @@ void setup() {
     setup_dht22();
     setup_mtp40f();
     setup_gps();
+
+    digitalWrite(STATUS_LED, LOW);
 }
 
 void loop() {
@@ -53,6 +59,8 @@ void loop() {
             co2_ppm >= EMERGENCY_MODE_CO2_THRESHOLD ? emergency_mode_interval_val : transmission_interval_val;
 
     if (millis() - last_packet_sent > interval) {
+        digitalWrite(STATUS_LED, HIGH);
+
         TinyGPSLocation loc = gps.get_location();
         LoRa_Payload payload;
 
@@ -76,6 +84,8 @@ void loop() {
 
         last_packet_sent = millis();
         send_lora_message(payload);
+
+        digitalWrite(STATUS_LED, LOW);
     }
 
     handle_lora_reception();
