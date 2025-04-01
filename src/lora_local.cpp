@@ -1,6 +1,7 @@
 #include <HardwareSerial.h>
 #include <LoRa.h>
 #include <lora_local.h>
+#include <memory.h>
 
 #define LORA_FREQ 433E6 // LoRa module frequency (433 MHz)
 #define PACKET_TTL 5 // Time to live for a packet
@@ -11,8 +12,9 @@ extern byte device_id;
 uint16_t msg_count = 0;
 bool allow_forwarding = true;
 
-void setup_lora(const int sync_word, const int ss, const int reset, const int dio0) {
+void setup_lora(const int sync_word, const int ss, const int reset, const int dio0, SPIClass &spi) {
     LoRa.setPins(ss, reset, dio0);
+    LoRa.setSPI(spi);
     LoRa.setSyncWord(sync_word);
 
     if (!LoRa.begin(LORA_FREQ)) {
@@ -24,11 +26,16 @@ void setup_lora(const int sync_word, const int ss, const int reset, const int di
 }
 
 void send_lora_message(LoRa_Payload payload) {
+    if (++msg_count == UINT16_MAX) {
+        msg_count = 0;
+    }
+
     payload.forwarder_id = device_id;
     payload.transmitter_id = device_id;
-    payload.message_id = msg_count++;
+    payload.message_id = msg_count;
     payload.allow_forwarding = allow_forwarding;
     payload.ttl = PACKET_TTL;
+    payload.memory_usage = get_memory_usage();
 
     LoRa.beginPacket();
     LoRa.write(reinterpret_cast<byte *>(&payload), sizeof(payload));

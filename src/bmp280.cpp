@@ -1,10 +1,11 @@
 #include <Adafruit_BMP280.h>
 #include <HardwareSerial.h>
+#include <Wire.h>
 
 extern HardwareSerial GlobalSerial;
-extern int8_t BMP280_CS;
 
-Adafruit_BMP280 bmp(BMP280_CS);
+TwoWire BMP_WIRE(PB9, PB8);
+Adafruit_BMP280 bmp(&BMP_WIRE);
 
 void setup_bmp280() {
     if (!bmp.begin(0x76)) {
@@ -16,7 +17,7 @@ void setup_bmp280() {
     bmp.setSampling(Adafruit_BMP280::MODE_NORMAL, Adafruit_BMP280::SAMPLING_X2, Adafruit_BMP280::SAMPLING_X16,
                     Adafruit_BMP280::FILTER_X16, Adafruit_BMP280::STANDBY_MS_500);
 
-    GlobalSerial.print("BMP280 initialized");
+    GlobalSerial.println("BMP280 initialized");
 }
 
 float read_bmp280_temperature() { return bmp.readTemperature(); }

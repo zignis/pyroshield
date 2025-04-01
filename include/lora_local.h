@@ -21,9 +21,12 @@ typedef struct {
     uint16_t gps_satellites{}; /// The number of GPS satellites in view.
 
     /* Power */
-    uint8_t battery_temp{}; // The battery temperature reading.
+    uint8_t battery_temp{}; /// The battery temperature reading.
     uint16_t battery_voltage{}; /// The battery voltage reading (scaled by 100).
     uint16_t charger_voltage{}; /// The charger voltage reading (scaled by 100).
+
+    /* System */
+    uint16_t memory_usage{}; /// The memory used by heap and stack (in bytes).
 } LoRa_Payload;
 
 /**
@@ -32,8 +35,9 @@ typedef struct {
  * @param ss The NSS pin.
  * @param reset The NRESET pin.
  * @param dio0 The DIO0 pin.
+ * @param spi The SPI interface.
  */
-void setup_lora(int sync_word, int ss, int reset, int dio0);
+void setup_lora(int sync_word, int ss, int reset, int dio0, SPIClass &spi);
 
 /**
  * @brief Sends a LoRa message.

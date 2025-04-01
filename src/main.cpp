@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
+#include <SPI.h>
 #include <bmp280.h>
 #include <dht22.h>
 #include <gps.h>
@@ -9,16 +10,16 @@
 
 #define LORA_SYNC_WORD 0xB4 // Sync word for this network
 #define LORA_SS_PIN PA8
-#define LORA_RESET_PIN PB15
-#define LORA_DIO0_PIN PB14
+#define LORA_RESET_PIN PB14
+#define LORA_DIO0_PIN PB15
 #define EMERGENCY_MODE_CO2_THRESHOLD 800 // Threshold for emergency mode (in PPM).
 #define DEBUG_MODE_PIN PinName::PB_12
 #define STATUS_LED PC13
 
 auto GlobalSerial = HardwareSerial(USART1);
 
+SPIClass LoRa_SPI(PB5, PB4, PB3);
 byte device_id = 0x01; // Unique device identifier
-int8_t BMP280_CS = 10; // Chip select for BMP280 sensor.
 GPS gps; // GPS object.
 
 uint32_t last_packet_sent = 0; // Timestamp of the last packet that was transmitted.
@@ -33,18 +34,19 @@ void setup() {
 
     digitalWrite(STATUS_LED, HIGH);
 
+    LoRa_SPI.begin();
     GlobalSerial.begin(9600);
-    delay(10.000); // Wait for Serial communication
+
+    delay(5000); // Wait for Serial communication
+
     GlobalSerial.println("Starting...");
 
     setup_power_sources();
-    setup_lora(LORA_SYNC_WORD, LORA_SS_PIN, LORA_RESET_PIN, LORA_DIO0_PIN);
+    setup_lora(LORA_SYNC_WORD, LORA_SS_PIN, LORA_RESET_PIN, LORA_DIO0_PIN, LoRa_SPI);
     setup_bmp280();
     setup_dht22();
     setup_mtp40f();
     setup_gps();
-
-    digitalWrite(STATUS_LED, LOW);
 }
 
 void loop() {
@@ -59,7 +61,7 @@ void loop() {
             co2_ppm >= EMERGENCY_MODE_CO2_THRESHOLD ? emergency_mode_interval_val : transmission_interval_val;
 
     if (millis() - last_packet_sent > interval) {
-        digitalWrite(STATUS_LED, HIGH);
+        digitalWrite(STATUS_LED, LOW);
 
         TinyGPSLocation loc = gps.get_location();
         LoRa_Payload payload;
@@ -85,7 +87,7 @@ void loop() {
         last_packet_sent = millis();
         send_lora_message(payload);
 
-        digitalWrite(STATUS_LED, LOW);
+        digitalWrite(STATUS_LED, HIGH);
     }
 
     handle_lora_reception();
