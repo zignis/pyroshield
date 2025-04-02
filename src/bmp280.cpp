@@ -1,11 +1,14 @@
 #include <Adafruit_BMP280.h>
 #include <HardwareSerial.h>
-#include <Wire.h>
 
 extern HardwareSerial GlobalSerial;
 
-TwoWire BMP_WIRE(PB9, PB8);
-Adafruit_BMP280 bmp(&BMP_WIRE);
+#define BMP_SCK (PB8)
+#define BMP_MOSI (PB9)
+#define BMP_MISO (PC15)
+#define BMP_CS (PC14)
+
+Adafruit_BMP280 bmp(BMP_CS, BMP_MOSI, BMP_MISO, BMP_SCK);
 
 void setup_bmp280() {
     if (!bmp.begin(0x76)) {
@@ -15,7 +18,7 @@ void setup_bmp280() {
     }
 
     bmp.setSampling(Adafruit_BMP280::MODE_NORMAL, Adafruit_BMP280::SAMPLING_X2, Adafruit_BMP280::SAMPLING_X16,
-                    Adafruit_BMP280::FILTER_X16, Adafruit_BMP280::STANDBY_MS_500);
+                    Adafruit_BMP280::FILTER_X16, Adafruit_BMP280::STANDBY_MS_2000);
 
     GlobalSerial.println("BMP280 initialized");
 }

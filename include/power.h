@@ -6,6 +6,7 @@
 void setup_power_sources();
 
 /**
+ * @brief Reads the battery temperature via thermistor using the Steinhart-Hart equation.
  * @return Battery temperature reading in degrees celsius.
  */
 uint8_t read_battery_temperature();

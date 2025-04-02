@@ -29,12 +29,13 @@ uint32_t debug_mode_transmission_interval = 5 * 1000; // Interval for transmissi
 uint32_t debug_mode_emergency_interval = 2 * 1000; // Interval for transmission in emergency mode (in ms)
 
 void setup() {
+    AFIO->MAPR |= AFIO_MAPR_SWJ_CFG_JTAGDISABLE; // Disable JTAG
+
     pinMode(DEBUG_MODE_PIN, INPUT_PULLDOWN);
     pinMode(STATUS_LED, OUTPUT);
 
     digitalWrite(STATUS_LED, HIGH);
 
-    LoRa_SPI.begin();
     GlobalSerial.begin(9600);
 
     delay(5000); // Wait for Serial communication
