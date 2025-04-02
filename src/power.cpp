@@ -25,7 +25,7 @@ void setup_power_sources() {
     pinMode(CHARGER_PIN, INPUT_PULLDOWN);
 }
 
-uint8_t read_battery_temperature() {
+float read_battery_temperature() {
     auto reading = static_cast<float>(analogRead(THERMISTOR_PIN));
     reading = ADC_RES_UPPER_BOUND / reading - 1;
     reading = THERMISTOR_SERIES_RESISTOR / reading;
@@ -37,7 +37,7 @@ uint8_t read_battery_temperature() {
     steinhart = 1.0 / steinhart; // Invert
     steinhart -= TEMP_0; // Convert absolute temp to celsius.
 
-    return static_cast<uint8_t>(steinhart);
+    return static_cast<float>(steinhart);
 }
 
 /**

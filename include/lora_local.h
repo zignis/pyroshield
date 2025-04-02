@@ -12,8 +12,8 @@ typedef struct {
     uint16_t co2_ppm{}; /// The CO2 gas concentration.
     uint16_t pressure{}; /// The pressure reading.
     uint16_t bmp280_altitude{}; /// The altitude reading from BMP280 sensor.
-    uint8_t bmp280_temp{}; /// The temperature reading from BMP280 sensor.
-    uint8_t dht22_temp{}; /// The temperature reading from DHT22 sensor.
+    uint16_t bmp280_temp{}; /// The temperature reading from BMP280 sensor.
+    uint16_t dht22_temp{}; /// The temperature reading from DHT22 sensor.
     uint8_t humidity{}; /// The humidity reading.
     uint16_t gps_altitude{}; /// The altitude reading from GPS.
     float gps_lat{}; /// The latitude reading from GPS.
@@ -21,7 +21,7 @@ typedef struct {
     uint16_t gps_satellites{}; /// The number of GPS satellites in view.
 
     /* Power */
-    uint8_t battery_temp{}; /// The battery temperature reading.
+    uint16_t battery_temp{}; /// The battery temperature reading.
     uint16_t battery_voltage{}; /// The battery voltage reading (scaled by 100).
     uint16_t charger_voltage{}; /// The charger voltage reading (scaled by 100).
 

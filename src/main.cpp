@@ -71,9 +71,9 @@ void loop() {
 
         payload.pressure = static_cast<uint16_t>(read_bmp280_pressure());
         payload.bmp280_altitude = static_cast<uint16_t>(read_bmp280_altitude());
-        payload.bmp280_temp = static_cast<uint8_t>(read_bmp280_temperature());
+        payload.bmp280_temp = static_cast<uint16_t>(read_bmp280_temperature() * 10);
 
-        payload.dht22_temp = static_cast<uint8_t>(read_dht22_temperature());
+        payload.dht22_temp = static_cast<uint16_t>(read_dht22_temperature() * 10);
         payload.humidity = static_cast<uint8_t>(read_dht22_humidity());
 
         payload.gps_altitude = static_cast<uint16_t>(gps.get_altitude().meters());
@@ -81,7 +81,7 @@ void loop() {
         payload.gps_lat = static_cast<float>(loc.lat());
         payload.gps_lng = static_cast<float>(loc.lng());
 
-        payload.battery_temp = read_battery_temperature();
+        payload.battery_temp = static_cast<uint16_t>(read_battery_temperature() * 10);
         payload.battery_voltage = static_cast<uint16_t>(read_battery_voltage() * 100);
         payload.charger_voltage = static_cast<uint16_t>(read_charger_voltage() * 100);
 
