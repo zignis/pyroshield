@@ -15,15 +15,16 @@ bool allow_forwarding = true;
 void setup_lora(const int sync_word, const int ss, const int reset, const int dio0, SPIClass &spi) {
     spi.begin();
 
-    LoRa.enableCrc();
     LoRa.setPins(ss, reset, dio0);
     LoRa.setSPI(spi);
-    LoRa.setSyncWord(sync_word);
 
     if (!LoRa.begin(LORA_FREQ)) {
         GlobalSerial.println("Failed to initialize LoRa");
         exit(EXIT_FAILURE);
     }
+
+    LoRa.enableCrc();
+    LoRa.setSyncWord(sync_word);
 
     GlobalSerial.println("LoRa initialized");
 }
