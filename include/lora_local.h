@@ -1,6 +1,6 @@
 #pragma once
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     /* Header */
     byte forwarder_id = 0; /// Forwarder device ID.
     byte transmitter_id = 0; /// Transmitter device ID.
