@@ -11,7 +11,6 @@ extern GPS gps;
 HardwareSerial GPS_Serial(PB11, PB10);
 TinyGPSPlus tiny_gps;
 
-
 GPS::GPS() { last_read = millis(); }
 
 void GPS::set_satellites(const TinyGPSInteger &satellites) { this->satellites = satellites; }
@@ -71,10 +70,13 @@ void setup_gps() {
 }
 
 void update_gps_object() {
+    bool has_updated = false;
     auto bytes_available = GPS_Serial.available();
 
-    while (bytes_available--) {
+    // Read a single sentence.
+    while (!has_updated && bytes_available--) {
         if (tiny_gps.encode(GPS_Serial.read())) {
+            has_updated = true;
             gps.update_last_read();
 
             if (tiny_gps.satellites.isValid()) {
@@ -88,6 +90,7 @@ void update_gps_object() {
             if (tiny_gps.date.isValid()) {
                 gps.set_date(tiny_gps.date);
             }
+
             if (tiny_gps.time.isValid()) {
                 gps.set_time(tiny_gps.time);
             }

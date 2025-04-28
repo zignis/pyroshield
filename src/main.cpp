@@ -51,8 +51,6 @@ void setup() {
 }
 
 void loop() {
-    update_gps_object();
-
     const uint16_t co2_ppm = read_mtp40f_gas_concentration();
     const bool debug = digitalReadFast(DEBUG_MODE_PIN) == HIGH;
     const uint32_t transmission_interval_val = debug ? debug_mode_transmission_interval : transmission_interval;
@@ -85,10 +83,18 @@ void loop() {
         payload.battery_voltage = static_cast<uint16_t>(read_battery_voltage() * 100);
         payload.charger_voltage = static_cast<uint16_t>(read_charger_voltage() * 100);
 
+        GlobalSerial.println(payload.gps_satellites);
+        GlobalSerial.println(payload.gps_satellites);
+        GlobalSerial.println(payload.gps_satellites);
+        GlobalSerial.println(payload.gps_satellites);
+        GlobalSerial.println(payload.gps_satellites);
+
         last_packet_sent = millis();
         send_lora_message(payload);
 
         digitalWrite(STATUS_LED, HIGH);
+    } else {
+        update_gps_object();
     }
 
     handle_lora_reception();
