@@ -83,12 +83,6 @@ void loop() {
         payload.battery_voltage = static_cast<uint16_t>(read_battery_voltage() * 100);
         payload.charger_voltage = static_cast<uint16_t>(read_charger_voltage() * 100);
 
-        GlobalSerial.println(payload.gps_satellites);
-        GlobalSerial.println(payload.gps_satellites);
-        GlobalSerial.println(payload.gps_satellites);
-        GlobalSerial.println(payload.gps_satellites);
-        GlobalSerial.println(payload.gps_satellites);
-
         last_packet_sent = millis();
         send_lora_message(payload);
 

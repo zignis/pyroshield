@@ -71,10 +71,16 @@ void setup_gps() {
 
 void update_gps_object() {
     bool has_updated = false;
+    const auto called_ts = millis();
     auto bytes_available = GPS_Serial.available();
 
     // Read a single sentence.
     while (!has_updated && bytes_available--) {
+        // Bail out when stuck for more than 8 seconds
+        if (millis() - called_ts > 8 * 1000) {
+            break;
+        }
+
         if (tiny_gps.encode(GPS_Serial.read())) {
             has_updated = true;
             gps.update_last_read();
