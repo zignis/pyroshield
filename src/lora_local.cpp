@@ -29,7 +29,7 @@ void setup_lora(const int sync_word, const int ss, const int reset, const int di
     GlobalSerial.println("LoRa initialized");
 }
 
-void send_lora_message(LoRa_Payload payload) {
+void send_lora_message(LoRa_Payload payload, const bool emergency) {
     if (++msg_count == UINT16_MAX) {
         msg_count = 0;
     }
@@ -45,8 +45,14 @@ void send_lora_message(LoRa_Payload payload) {
     LoRa.write(reinterpret_cast<byte *>(&payload), sizeof(payload));
     LoRa.endPacket();
 
-    GlobalSerial.println("[LoRa][" + String(payload.message_id) + "]: message sent (" + String(sizeof(payload)) +
-                         " bytes)");
+    GlobalSerial.print("[LoRa]");
+    GlobalSerial.print(payload.gps_lat, 6); // TODO
+
+    if (emergency) {
+        GlobalSerial.print("[EMERGENCY]");
+    }
+
+    GlobalSerial.println("[" + String(payload.message_id) + "]: message sent (" + String(sizeof(payload)) + " bytes)");
 }
 
 void handle_lora_reception() {

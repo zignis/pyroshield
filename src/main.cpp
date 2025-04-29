@@ -40,7 +40,7 @@ void setup() {
 
     delay(5000); // Wait for Serial communication
 
-    GlobalSerial.println("Starting...");
+    GlobalSerial.println("starting...");
 
     setup_power_sources();
     setup_lora(LORA_SYNC_WORD, LORA_SS_PIN, LORA_RESET_PIN, LORA_DIO0_PIN, LoRa_SPI);
@@ -55,9 +55,9 @@ void loop() {
     const bool debug = digitalReadFast(DEBUG_MODE_PIN) == HIGH;
     const uint32_t transmission_interval_val = debug ? debug_mode_transmission_interval : transmission_interval;
     const uint32_t emergency_mode_interval_val = debug ? debug_mode_emergency_interval : emergency_mode_interval;
+    const bool emergency = co2_ppm >= EMERGENCY_MODE_CO2_THRESHOLD;
     // ReSharper disable once CppTooWideScopeInitStatement
-    const uint32_t interval =
-            co2_ppm >= EMERGENCY_MODE_CO2_THRESHOLD ? emergency_mode_interval_val : transmission_interval_val;
+    const uint32_t interval = emergency ? emergency_mode_interval_val : transmission_interval_val;
 
     if (millis() - last_packet_sent > interval) {
         digitalWrite(STATUS_LED, LOW);
@@ -84,7 +84,7 @@ void loop() {
         payload.charger_voltage = static_cast<uint16_t>(read_charger_voltage() * 100);
 
         last_packet_sent = millis();
-        send_lora_message(payload);
+        send_lora_message(payload, emergency);
 
         digitalWrite(STATUS_LED, HIGH);
     } else {

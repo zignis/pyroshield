@@ -42,8 +42,9 @@ void setup_lora(int sync_word, int ss, int reset, int dio0, SPIClass &spi);
 /**
  * @brief Sends a LoRa message.
  * @param payload The payload to send.
+ * @param emergency The emergency flag.
  */
-void send_lora_message(LoRa_Payload payload);
+void send_lora_message(LoRa_Payload payload, bool emergency);
 
 /**
  * @brief Incoming LoRa messages handler.
