@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <SPI.h>
+#include <STM32FreeRTOS.h>
 #include <bmp280.h>
 #include <dht22.h>
 #include <gps.h>
@@ -28,6 +29,10 @@ uint32_t emergency_mode_interval = 10 * 1000; // Interval for emergency mode (in
 uint32_t debug_mode_transmission_interval = 5 * 1000; // Interval for transmission in debug mode (in ms)
 uint32_t debug_mode_emergency_interval = 2 * 1000; // Interval for transmission in emergency mode (in ms)
 
+[[noreturn]] void task_lora_transmission(void *pvParameters);
+[[noreturn]] void task_lora_reception(void *pvParameters);
+[[noreturn]] void task_gps_update(void *pvParameters);
+
 void setup() {
     AFIO->MAPR |= AFIO_MAPR_SWJ_CFG_JTAGDISABLE; // Disable JTAG
 
@@ -48,18 +53,34 @@ void setup() {
     setup_dht22();
     setup_mtp40f();
     setup_gps();
+
+    // Setup tasks
+    xTaskCreate(task_lora_transmission, "LORA:TRANSMIT", 1280, NULL, 1, NULL);
+    // xTaskCreate(task_lora_reception, "LORA:RECEIVE", 1280, NULL, 1, NULL);
+    xTaskCreate(task_gps_update, "GPS:UPDATE", 1280, NULL, 0, NULL);
+
+    // Start scheduler
+    vTaskStartScheduler();
+    Serial.println("insufficient RAM");
+
+    // ReSharper disable once CppDFAEndlessLoop
+    while (true)
+        ;
 }
 
-void loop() {
-    const uint16_t co2_ppm = read_mtp40f_gas_concentration();
-    const bool debug = digitalReadFast(DEBUG_MODE_PIN) == HIGH;
-    const uint32_t transmission_interval_val = debug ? debug_mode_transmission_interval : transmission_interval;
-    const uint32_t emergency_mode_interval_val = debug ? debug_mode_emergency_interval : emergency_mode_interval;
-    const bool emergency = co2_ppm >= EMERGENCY_MODE_CO2_THRESHOLD;
-    // ReSharper disable once CppTooWideScopeInitStatement
-    const uint32_t interval = emergency ? emergency_mode_interval_val : transmission_interval_val;
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
+[[noreturn]] void task_lora_transmission(void *pvParameters) {
+    (void) pvParameters;
 
-    if (millis() - last_packet_sent > interval) {
+    for (;;) {
+        const uint16_t co2_ppm = read_mtp40f_gas_concentration();
+        const bool debug = digitalReadFast(DEBUG_MODE_PIN) == HIGH;
+        const uint32_t transmission_interval_val = debug ? debug_mode_transmission_interval : transmission_interval;
+        const uint32_t emergency_mode_interval_val = debug ? debug_mode_emergency_interval : emergency_mode_interval;
+        const bool emergency = co2_ppm >= EMERGENCY_MODE_CO2_THRESHOLD;
+        // ReSharper disable once CppTooWideScopeInitStatement
+        const uint32_t interval = emergency ? emergency_mode_interval_val : transmission_interval_val;
+
         digitalWrite(STATUS_LED, LOW);
 
         TinyGPSLocation loc = gps.get_location();
@@ -83,13 +104,30 @@ void loop() {
         payload.battery_voltage = static_cast<uint16_t>(read_battery_voltage() * 100);
         payload.charger_voltage = static_cast<uint16_t>(read_charger_voltage() * 100);
 
+
         last_packet_sent = millis();
         send_lora_message(payload, emergency);
 
         digitalWrite(STATUS_LED, HIGH);
-    } else {
+
+        vTaskDelay(interval / portTICK_PERIOD_MS);
+    }
+}
+
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
+[[noreturn]] void task_lora_reception(void *pvParameters) {
+    (void) pvParameters;
+    for (;;) {
+        handle_lora_reception();
+    }
+}
+
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
+[[noreturn]] void task_gps_update(void *pvParameters) {
+    (void) pvParameters;
+    for (;;) {
         update_gps_object();
     }
-
-    handle_lora_reception();
 }
+
+void loop() {}

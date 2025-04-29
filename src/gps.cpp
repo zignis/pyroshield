@@ -70,25 +70,20 @@ void setup_gps() {
 }
 
 void update_gps_object() {
-    constexpr uint32_t timeout_ms = 5000; // Bail out after 5 seconds
-    const uint32_t start_time = millis();
+    while (GPS_Serial.available()) {
+        if (const char c = GPS_Serial.read(); tiny_gps.encode(c)) {
+            gps.update_last_read();
 
-    while (millis() - start_time < timeout_ms) {
-        if (GPS_Serial.available()) {
-            if (const char c = GPS_Serial.read(); tiny_gps.encode(c)) {
-                gps.update_last_read();
-
-                if (tiny_gps.satellites.isValid())
-                    gps.set_satellites(tiny_gps.satellites);
-                if (tiny_gps.location.isValid())
-                    gps.set_location(tiny_gps.location);
-                if (tiny_gps.date.isValid())
-                    gps.set_date(tiny_gps.date);
-                if (tiny_gps.time.isValid())
-                    gps.set_time(tiny_gps.time);
-                if (tiny_gps.altitude.isValid())
-                    gps.set_altitude(tiny_gps.altitude);
-            }
+            if (tiny_gps.satellites.isValid())
+                gps.set_satellites(tiny_gps.satellites);
+            if (tiny_gps.location.isValid())
+                gps.set_location(tiny_gps.location);
+            if (tiny_gps.date.isValid())
+                gps.set_date(tiny_gps.date);
+            if (tiny_gps.time.isValid())
+                gps.set_time(tiny_gps.time);
+            if (tiny_gps.altitude.isValid())
+                gps.set_altitude(tiny_gps.altitude);
         }
     }
 }
