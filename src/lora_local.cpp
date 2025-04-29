@@ -46,7 +46,6 @@ void send_lora_message(LoRa_Payload payload, const bool emergency) {
     LoRa.endPacket();
 
     GlobalSerial.print("[LoRa]");
-    GlobalSerial.print(payload.gps_lat, 6); // TODO
 
     if (emergency) {
         GlobalSerial.print("[EMERGENCY]");
