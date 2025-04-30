@@ -25,6 +25,8 @@ void setup_lora(const int sync_word, const int ss, const int reset, const int di
 
     LoRa.enableCrc();
     LoRa.setSyncWord(sync_word);
+    LoRa.setSpreadingFactor(12);
+    LoRa.setTxPower(20, PA_OUTPUT_PA_BOOST_PIN);
 
     GlobalSerial.println("LoRa initialized");
 }
